@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
-# Build the launcher and install it on the Doov phone (via bench-laptop). Keeps app data (-r).
+# Build the launcher and install it on the phone, keeping its data.
 set -euo pipefail
-cd "$(dirname "$0")/.."
-SERIAL="${DOOV_SERIAL:-SERIAL}"
-SSH=(ssh -F "$HOME/.ssh/config" -o BatchMode=yes -o ConnectTimeout=10 bench-laptop)
-
-./gradlew --offline -q assembleDebug
-APK=app/build/outputs/apk/debug/app-debug.apk
-"${SSH[@]}" 'mkdir -p ~/doovdroid'
-scp -q -F "$HOME/.ssh/config" "$APK" bench-laptop:doovdroid/doovdroid.apk
-"${SSH[@]}" "adb -s $SERIAL install -r ~/doovdroid/doovdroid.apk"
+. "$(dirname "$0")/lib.sh"
+cd "$DOOV_ROOT"
+# shellcheck disable=SC2086
+./gradlew -q $DOOV_GRADLE_ARGS assembleDebug
+adb_push app/build/outputs/apk/debug/app-debug.apk /data/local/tmp/doovdroid.apk
+adb_run shell pm install -r /data/local/tmp/doovdroid.apk
+adb_run shell rm -f /data/local/tmp/doovdroid.apk

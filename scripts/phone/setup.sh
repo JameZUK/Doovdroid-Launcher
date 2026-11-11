@@ -1,11 +1,11 @@
 #!/system/bin/sh
 # Runs ON the phone (adb shell), started by scripts/setup-phone.sh. Safe to run again.
-# Every change is listed with its undo in docs/phone-changes.md; scripts/phone/restore.sh undoes them.
+# Every change is listed in docs/installing.md ("What setup changes"); scripts/phone/restore.sh undoes them.
 PKG=uk.me.jamez.doovdroid
 GUARD=$PKG/$PKG.GuardService
 LISTENER=$PKG/$PKG.BadgeListener
 T9=com.marshaltec.ime.t9ime/.T9IME
-# Play Store stays ENABLED (the guard hides it): WhatsApp needs it for updates. See docs/admin.md.
+# Play Store stays ENABLED (the guard hides it): WhatsApp needs it for updates. See docs/troubleshooting.md.
 DISABLE="com.facebook.katana com.google.android.youtube com.android.chrome com.google.android.gm"
 
 step() { echo "== $*"; }

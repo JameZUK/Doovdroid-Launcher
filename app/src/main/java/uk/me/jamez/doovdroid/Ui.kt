@@ -9,7 +9,7 @@ import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.widget.TextView
 
-/** Screen colours. Chosen with `style=` in the config file; see docs/admin.md. */
+/** Screen colours. Chosen with `style=` in the settings file; see docs/settings-file.md. */
 data class Palette(val paper: Int, val ink: Int, val muted: Int, val alert: Int) {
     companion object {
         /** Pale green LCD with near-black text: the default. */

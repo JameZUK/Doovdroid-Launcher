@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
-# Lock the Doov phone down around the launcher: scripts/setup-phone.sh
-# Undo everything:                                scripts/setup-phone.sh --restore
+# Set the phone up around the launcher (docs/installing.md):   scripts/setup-phone.sh
+# Undo every setting it changed:                                scripts/setup-phone.sh --restore
 set -euo pipefail
-cd "$(dirname "$0")/.."
-SERIAL="${DOOV_SERIAL:-SERIAL}"
-SSHCONF="$HOME/.ssh/config"
-SSH=(ssh -F "$SSHCONF" -o BatchMode=yes -o ConnectTimeout=10 bench-laptop)
+. "$(dirname "$0")/lib.sh"
+cd "$DOOV_ROOT"
 SCRIPT=scripts/phone/setup.sh
 [ "${1:-}" = "--restore" ] && SCRIPT=scripts/phone/restore.sh
-NAME=$(basename "$SCRIPT")
-"${SSH[@]}" 'mkdir -p ~/doovdroid'
-scp -q -F "$SSHCONF" "$SCRIPT" "bench-laptop:doovdroid/$NAME"
-"${SSH[@]}" "adb -s $SERIAL push ~/doovdroid/$NAME /data/local/tmp/doovdroid-$NAME >/dev/null && adb -s $SERIAL shell sh /data/local/tmp/doovdroid-$NAME; adb -s $SERIAL shell rm -f /data/local/tmp/doovdroid-$NAME"
+TMP=/data/local/tmp/doovdroid-$(basename "$SCRIPT")
+adb_push "$SCRIPT" "$TMP"
+adb_run shell sh "$TMP"
+adb_run shell rm -f "$TMP"

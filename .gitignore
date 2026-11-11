@@ -16,3 +16,7 @@ signing.properties
 pulled/
 *.png
 !app/src/main/res/**/*.png
+!docs/images/*.png
+
+# Where this checkout's phone is (serial, SSH host): see scripts/local.env.example
+scripts/local.env
