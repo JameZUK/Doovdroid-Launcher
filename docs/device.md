@@ -36,7 +36,7 @@ There is no device-specific key layout (`mtk-kpd.kl` absent), so `Generic.kl` ap
 | Physical | Linux key | Android keycode |
 |----------|-----------|-----------------|
 | 0–9 | `KEY_0`…`KEY_9` | `KEYCODE_0`…`KEYCODE_9` |
-| `*` / `#` | `KEY_NUMERIC_STAR` / `KEY_NUMERIC_POUND` | `KEYCODE_STAR` / `KEYCODE_POUND` |
+| `*` / `#` | `KEY_NUMERIC_STAR` / `KEY_NUMERIC_POUND` | `KEYCODE_STAR` / `KEYCODE_POUND`, **but** when no text box has focus the phone turns them into **media volume down / up** (stream 3, confirmed 2026-11-11) and apps never see them. Something in the vendor ROM does this (maybe the `ButtonLightService` accessibility service); not tracked down |
 | D-pad | `KEY_UP/DOWN/LEFT/RIGHT` | `KEYCODE_DPAD_*` |
 | OK | `KEY_ENTER` | `KEYCODE_ENTER` |
 | Green | `KEY_SEND` (assumed, not yet pressed in a capture) | `KEYCODE_CALL` |

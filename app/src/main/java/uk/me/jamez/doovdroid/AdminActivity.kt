@@ -13,7 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 
 /**
- * For the family, not the phone's user: opened by typing *#<pin># on the home screen. Unlocks the
+ * For the family, not the phone's user: opened by typing 0000<pin> on the home screen. Unlocks the
  * guard for [Admin.UNLOCK_MINUTES] minutes so Settings and the rest can be used. Keys or touch.
  */
 class AdminActivity : Activity() {
@@ -56,6 +56,10 @@ class AdminActivity : Activity() {
                 gravity = Gravity.CENTER_VERTICAL
                 setPadding(px(3.4f), 0, px(3.4f), 0)
                 setOnClickListener { selected = i; render(); entry.action() }
+                // Tappable views become focusable by default, and OK would then click whichever row
+                // has Android's focus instead of the highlighted one. Keys are handled in onKeyDown.
+                isFocusable = false
+                isFocusableInTouchMode = false
             }
             root.addView(row, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(12f)))
             rows += row

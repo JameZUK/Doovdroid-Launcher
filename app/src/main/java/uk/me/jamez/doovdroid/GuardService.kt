@@ -1,11 +1,14 @@
 package uk.me.jamez.doovdroid
 
 import android.accessibilityservice.AccessibilityService
+import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 
@@ -19,6 +22,24 @@ import android.view.accessibility.AccessibilityEvent
  * Calls, Messages, WhatsApp, Contacts, the keyboard and the system's own dialogs are left alone.
  */
 class GuardService : AccessibilityService() {
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val dismissShade = Runnable { performGlobalAction(GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE) }
+
+    /**
+     * Last resort: SystemUI sometimes ignores the dismiss. If the shade still has focus (and this isn't
+     * the lock screen, which is also a SystemUI window), Back closes it. Only the package name of the
+     * active window is read.
+     */
+    private val backOutOfShade = Runnable {
+        if (Admin.isUnlocked(this)) return@Runnable
+        val locked = getSystemService(KeyguardManager::class.java)?.isKeyguardLocked == true
+        val active = runCatching { rootInActiveWindow?.packageName?.toString() }.getOrNull()
+        if (!locked && active == SYSTEM_UI) {
+            Log.i(TAG, "pull-down still open; pressing Back")
+            performGlobalAction(GLOBAL_ACTION_BACK)
+        }
+    }
 
     private val screenOff = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -37,6 +58,7 @@ class GuardService : AccessibilityService() {
     }
 
     override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
         runCatching { unregisterReceiver(screenOff) }
         super.onDestroy()
     }
@@ -49,7 +71,13 @@ class GuardService : AccessibilityService() {
         when {
             pkg == SYSTEM_UI && isShade(event) -> {
                 Log.i(TAG, "closing the notification pull-down")
-                performGlobalAction(GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE)
+                // A dismiss that lands while the shade is still animating open is ignored, so keep
+                // trying for a couple of seconds. Dismissing a closed shade does nothing.
+                handler.removeCallbacks(dismissShade)
+                handler.removeCallbacks(backOutOfShade)
+                dismissShade.run()
+                for (delay in SHADE_RETRY_MS) handler.postDelayed(dismissShade, delay)
+                handler.postDelayed(backOutOfShade, SHADE_BACK_MS)
             }
             pkg in BLOCKED || pkg == AdminActivity.OLD_LAUNCHER -> {
                 Log.i(TAG, "blocked $pkg; going home")
@@ -81,6 +109,8 @@ class GuardService : AccessibilityService() {
         private const val TAG = "DoovdroidGuard"
         private const val SYSTEM_UI = "com.android.systemui"
         private val SHADE_WORDS = listOf("notification shade", "quick settings")
+        private val SHADE_RETRY_MS = listOf(300L, 700L, 1200L, 2000L)
+        private const val SHADE_BACK_MS = 2600L
 
         /** Apps the phone's user has no reason to be in. Disabled ones are listed too, in case they come back. */
         val BLOCKED = setOf(

@@ -13,7 +13,11 @@ data class SpeedEntry(val name: String, val number: String?)
  * Re-read every time the home screen comes back, so a change shows after the red key.
  */
 data class Config(val pin: String, val style: String, val speedDial: List<SpeedEntry>) {
+    /** What to type on the home screen. No real phone number starts with 0000. */
+    val adminCode: String get() = ADMIN_PREFIX + pin
+
     companion object {
+        const val ADMIN_PREFIX = "0000"
         const val FILE_NAME = "doovdroid.conf"
         const val DEFAULT_PIN = "3210"
         const val MAX_SPEED_DIAL = 8
@@ -25,7 +29,8 @@ data class Config(val pin: String, val style: String, val speedDial: List<SpeedE
             |# Doovdroid settings. Lines starting with # are ignored.
             |# Changes show the next time the home screen appears (press the red key).
             |
-            |# Admin code: type *#<pin># on the home screen. 4 to 12 digits.
+            |# Admin menu: type 0000 and then this PIN on the home screen (4 to 12 digits).
+            |# (* and # can't be used: on this phone they change the volume.)
             |pin=$DEFAULT_PIN
             |
             |# Screen colours: lcd (pale green), light (black on white) or dark (white on black).

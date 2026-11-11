@@ -39,6 +39,8 @@ import kotlin.math.min
 /**
  * The home screen: a clock, then one list (speed-dial people, then Messages, WhatsApp, Recent calls,
  * Contacts) that always fits on the screen. Keypad only: ▲▼ move, OK/green act, digits dial.
+ * Note: `*` and `#` never arrive here; this phone turns them into media volume down/up whenever
+ * no text box has focus.
  */
 class HomeActivity : Activity() {
 
@@ -306,7 +308,7 @@ class HomeActivity : Activity() {
     private fun type(ch: Char) {
         if (dial.length >= MAX_DIAL) return
         dial.append(ch)
-        if (ch == '#' && dial.toString() == "*#${config.pin}#") {
+        if (dial.length == config.adminCode.length && dial.toString() == config.adminCode) {
             dial.clear()
             render()
             Admin.unlock(this)

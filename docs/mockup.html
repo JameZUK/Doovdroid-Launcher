@@ -266,7 +266,8 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
           <dt>Left –</dt><dd>Does what the bar at the bottom of the screen says above it: <b>Call</b>, <b>Open</b> or <b>Select</b>. It also unlocks the lock screen.</dd>
           <dt>Right –</dt><dd>Does what the bar says above it: <b>Delete</b> a digit while dialling (hold it to clear the number), <b>Close</b> in the admin menu. Inside other apps it goes back.</dd>
           <dt class="g">Green</dt><dd>Calls the highlighted person, or the number you've typed.</dd>
-          <dt>0–9 * #</dt><dd>Start typing a phone number. Hold <b>0</b> for <b>+</b>.</dd>
+          <dt>0–9</dt><dd>Start typing a phone number. Hold <b>0</b> for <b>+</b>.</dd>
+          <dt>* #</dt><dd>Volume down and up. That's built into the phone, so they can't be dialled from this screen.</dd>
           <dt class="r">Red</dt><dd>This is also the power key. It hangs up a call. Otherwise it turns the screen off, and waking the phone always comes back to this screen. Hold it for the power menu.</dd>
         </dl>
       </section>
@@ -297,7 +298,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
           <li>Messages, WhatsApp, Recent calls and Contacts open the phone's own apps. The right dash key backs out of them, and waking the phone always comes back here.</li>
           <li>The notification pull-down, Settings and the app store are blocked. Facebook, YouTube, Chrome and Gmail are switched off.</li>
           <li>Texts are typed with the keypad (T9), not an on-screen keyboard.</li>
-          <li>For you: a hidden code typed on this screen opens an admin menu with Settings, unlocked for 15 minutes. This mockup uses <kbd>*#0000#</kbd>; the real code is set on the phone.</li>
+          <li>For you: typing <kbd>0000</kbd> and then a PIN on this screen opens an admin menu with Settings, unlocked for 15 minutes. No real phone number starts with 0000. This mockup uses <kbd>00009999</kbd>; the real PIN is set on the phone.</li>
         </ul>
       </section>
 
@@ -316,8 +317,9 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
     { key: "contacts", label: "Contacts" },
   ];
   const ADMIN = ["Settings", "Doov launcher", "Play Store", "Lock now"];
-  const ADMIN_CODE = "*#0000#";
-  const DIGITS = "0123456789*#";
+  const ADMIN_CODE = "00009999";
+  const DIGITS = "0123456789";
+  const ALL_KEYS = "0123456789*#";
   const SVGNS = "http://www.w3.org/2000/svg";
 
   const items = [
@@ -329,6 +331,14 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
   const screen = document.getElementById("screen");
   const note = document.getElementById("touchNote");
   let touchNoteUntil = 0;
+  let noteTimer;
+
+  function flash(text) {
+    note.textContent = text;
+    touchNoteUntil = Date.now() + 2400;
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => { if (Date.now() >= touchNoteUntil) note.textContent = ""; }, 2400);
+  }
 
   // Small DOM builders: h() for HTML elements, s() for SVG. Text always goes in as text nodes.
   function h(tag, props, ...kids) {
@@ -474,6 +484,10 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
       if (k === "red") { state.mode = "off"; return render(); }
       return;
     }
+    if (k === "*" || k === "#") {
+      flash(`On this phone, ${k === "*" ? "* turns the volume down" : "# turns the volume up"}.`);
+      return;
+    }
     if (k === "red") {
       // Red is the power key: it hangs up a call; otherwise the screen goes off, and waking it comes back home.
       if (m === "call") { state.sel = 0; return home(); }
@@ -490,7 +504,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
     if (m === "dial") {
       if (DIGITS.includes(k)) {
         if (state.dial.length < 20) state.dial += k;
-        if (k === "#" && state.dial === ADMIN_CODE) { state.dial = ""; state.adminSel = 0; state.mode = "admin"; }
+        if (state.dial === ADMIN_CODE) { state.dial = ""; state.adminSel = 0; state.mode = "admin"; }
       } else if (k === "back") {
         state.dial = state.dial.slice(0, -1);
         if (!state.dial) return home();
@@ -533,12 +547,9 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
   });
 
   // Touch is off on the real home screen.
-  let noteTimer;
   screen.addEventListener("click", () => {
     if (state.mode === "off" || state.mode === "lock") return;
-    note.textContent = "Touch is switched off. Use the keys.";
-    touchNoteUntil = Date.now() + 2200;
-    clearTimeout(noteTimer); noteTimer = setTimeout(() => { if (Date.now() >= touchNoteUntil) note.textContent = ""; }, 2200);
+    flash("Touch is switched off. Use the keys.");
   });
 
   // Computer keyboard.
@@ -546,7 +557,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
   document.addEventListener("keydown", e => {
     const t = e.target;
     if (t && t.closest && t.closest("input, .seg, .chip")) return;
-    const k = KEYMAP[e.key] || (DIGITS.includes(e.key) && e.key.length === 1 ? e.key : null);
+    const k = KEYMAP[e.key] || (ALL_KEYS.includes(e.key) && e.key.length === 1 ? e.key : null);
     if (!k) return;
     if ((e.key === "Enter" || e.key === " ") && t && t.closest && t.closest("[data-key]")) return; // the button's own click handles it
     e.preventDefault();
