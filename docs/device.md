@@ -39,7 +39,7 @@ There is no device-specific key layout (`mtk-kpd.kl` absent), so `Generic.kl` ap
 | `*` / `#` | `KEY_NUMERIC_STAR` / `KEY_NUMERIC_POUND` | `KEYCODE_STAR` / `KEYCODE_POUND`, **but** when no text box has focus the phone turns them into **media volume down / up** (stream 3, confirmed 2026-11-11) and apps never see them. Something in the vendor ROM does this (maybe the `ButtonLightService` accessibility service); not tracked down |
 | D-pad | `KEY_UP/DOWN/LEFT/RIGHT` | `KEYCODE_DPAD_*` |
 | OK | `KEY_ENTER` | `KEYCODE_ENTER` |
-| Green | `KEY_SEND` (assumed, not yet pressed in a capture) | `KEYCODE_CALL` |
+| Green | `KEY_SEND` (not captured, but confirmed by a real call from the launcher, 2026-11-11) | `KEYCODE_CALL` |
 | **Red** | **`KEY_POWER`** on `mtk-pmic-keys` — the red key *is* the power key (confirmed 2026-11-11) | `KEYCODE_POWER` (system: screen off/on, hold for the power menu) |
 | Left dash (soft key) | `KEY_MENU` on `mtk-kpd` (confirmed) | `KEYCODE_MENU`; also unlocks the lock screen |
 | Right dash (soft key) | `KEY_BACK` on `mtk-kpd` (confirmed) | `KEYCODE_BACK` |
