@@ -157,6 +157,7 @@ class HomeActivity : Activity() {
             val cfg = Config.load(this)
             val entries = cfg.speedDial.ifEmpty { PhoneData.starredNames(this).map { SpeedEntry(it, null) } }
             val found = entries.map { Person(it.name, it.number ?: PhoneData.numberFor(this, it.name)) }
+            Log.i(TAG, "speed dial: ${found.size} people, ${found.count { it.number == null }} without a number")
             val missed = PhoneData.missedCalls(this)
             val texts = PhoneData.unreadTexts(this)
             main.post {

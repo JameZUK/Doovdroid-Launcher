@@ -44,7 +44,10 @@ data class Config(val pin: String, val style: String, val speedDial: List<SpeedE
             if (!f.exists()) {
                 runCatching { f.writeText(TEMPLATE) }.onFailure { Log.w(TAG, "Can't write $f", it) }
             }
-            val lines = runCatching { f.readLines() }.getOrElse { return DEFAULT }
+            val lines = runCatching { f.readLines() }.getOrElse {
+                Log.w(TAG, "Can't read $f; using defaults", it)
+                return DEFAULT
+            }
             var pin = DEFAULT_PIN
             var style = "lcd"
             val speed = mutableListOf<SpeedEntry>()
