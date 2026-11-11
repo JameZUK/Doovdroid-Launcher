@@ -59,6 +59,14 @@
             android:exported="false"
             android:screenOrientation="portrait" />
 
+        <!-- Admin menu › Speed dial. -->
+        <activity
+            android:name=".SpeedDialActivity"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|fontScale|density|locale|layoutDirection|mcc|mnc|touchscreen"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
         <!-- Closes the notification pull-down and bounces blocked apps back home. -->
         <service
             android:name=".GuardService"

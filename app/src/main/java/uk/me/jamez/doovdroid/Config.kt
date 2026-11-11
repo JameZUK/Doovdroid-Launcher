@@ -75,5 +75,52 @@ data class Config(val pin: String, val style: String, val speedDial: List<SpeedE
             }
             return Config(pin, style, speed.filter { it.name.isNotEmpty() })
         }
+
+        /**
+         * Replace the `speed=` lines, keeping every other line (PIN, style, comments) as it is. The new
+         * lines go where the first old one was, or at the end if there were none. Written to a temporary
+         * file and renamed over the original, so a half-written file is never read.
+         */
+        fun saveSpeedDial(ctx: Context, entries: List<SpeedEntry>): Boolean {
+            val f = file(ctx) ?: return false
+            if (!f.exists()) load(ctx)
+            val lines = runCatching { f.readLines() }.getOrElse {
+                Log.w(TAG, "Can't read $f", it)
+                return false
+            }
+            val speedLines = entries.take(MAX_SPEED_DIAL).map { e -> "speed=${e.name}" + (e.number?.let { "|$it" } ?: "") }
+            val out = mutableListOf<String>()
+            var inserted = false
+            for (line in lines) {
+                if (isSpeedLine(line)) {
+                    if (!inserted) { out += speedLines; inserted = true }
+                    continue
+                }
+                out += line
+            }
+            if (!inserted) {
+                while (out.isNotEmpty() && out.last().isBlank()) out.removeAt(out.lastIndex)
+                out += speedLines
+            }
+            val tmp = File(f.parentFile, "$FILE_NAME.tmp")
+            return runCatching {
+                tmp.writeText(out.joinToString("\n", postfix = "\n"))
+                if (!tmp.renameTo(f)) {
+                    f.writeText(tmp.readText())
+                    tmp.delete()
+                }
+                true
+            }.getOrElse {
+                Log.w(TAG, "Can't write $f", it)
+                false
+            }
+        }
+
+        private fun isSpeedLine(line: String): Boolean {
+            val t = line.trim()
+            if (t.startsWith("#")) return false
+            val eq = t.indexOf('=')
+            return eq > 0 && t.substring(0, eq).trim().equals("speed", ignoreCase = true)
+        }
     }
 }

@@ -10,6 +10,7 @@ The admin menu unlocks the phone for **15 minutes**:
 
 | Item | Does |
 |------|------|
+| Speed dial | Choose who is on the home screen and in what order (below) |
 | Settings | Android Settings |
 | Doov launcher | The maker's old big-tile launcher, without changing the default |
 | Play Store | For updating WhatsApp (see below) |
@@ -17,7 +18,26 @@ The admin menu unlocks the phone for **15 minutes**:
 
 Left dash key or OK selects; right dash key closes. Touch works here too.
 
-**Change the PIN** in the settings file (below). Do it before the phone goes back to its owner.
+The PIN is set in the settings file (below).
+
+## Speed dial
+
+Admin menu › **Speed dial** lists the people on the home screen, top to bottom, with
+**+ Add someone** under them while there are fewer than 8.
+
+- **▲ ▼** choose. **OK** or the **left dash key**: *Options* on a person, *Add* on the last row.
+  **Right dash key**: back.
+- **Options › Move**: ▲ ▼ shift the person up and down the list; OK (or either dash key) when done.
+- **Options › Remove**: takes them off straight away.
+- **Add someone** opens the phone's contact picker (it has search). The contact's *name* is saved
+  and the number is looked up each time, so a changed number follows; if you pick a number other
+  than the contact's main one, that number is saved with the name instead.
+
+Every change is written to the settings file at once (only the `speed=` lines; the PIN, style and
+comments are left as they are) and shows when the home screen comes back. Up to 8 people fit; the
+fewer there are, the bigger the names.
+
+Or edit the file from a computer, below.
 
 ## Settings file
 

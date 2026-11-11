@@ -2,14 +2,10 @@ package uk.me.jamez.doovdroid
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import android.view.Gravity
 import android.view.KeyEvent
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 
 /**
@@ -21,74 +17,29 @@ class AdminActivity : Activity() {
     private class Entry(val label: String, val action: () -> Unit)
 
     private val entries = listOf(
+        Entry("Speed dial") { startActivity(Intent(this, SpeedDialActivity::class.java)) },
         Entry("Settings") { open(Intent(Settings.ACTION_SETTINGS)) },
         Entry("Doov launcher") { open(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).setPackage(OLD_LAUNCHER)) },
         Entry("Play Store") { packageManager.getLaunchIntentForPackage("com.android.vending")?.let(::open) ?: toast("Play Store is switched off") },
         Entry("Lock now") { Admin.lock(this); finish() },
     )
-    private val rows = mutableListOf<TextView>()
     private var selected = 0
-    private var palette = Palette.LCD
-    private lateinit var subtitle: TextView
+    private lateinit var screen: LcdScreen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Admin.unlock(this)
-        palette = Palette.named(Config.load(this).style)
-        val u = Ui.unit(this)
-        val px = { units: Float -> (units * u).toInt() }
-
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(palette.paper)
-            setPadding(0, px(3f), 0, 0)
+        screen = LcdScreen(this, Palette.named(Config.load(this).style))
+        screen.setTitle("Admin")
+        screen.setSoft("Select", "Close")
+        val version = runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull()
+        screen.setInfo("Doovdroid $version")
+        screen.onRowClick = { i ->
+            selected = i
+            render()
+            entries[i].action()
         }
-        val title = Ui.text(this, 7f * u, Ui.BOLD).apply { text = "Admin"; setTextColor(palette.ink); setPadding(px(3.4f), 0, px(3.4f), 0) }
-        subtitle = Ui.text(this, 4.6f * u).apply { setTextColor(palette.muted); setPadding(px(3.4f), px(1f), px(3.4f), px(2f)) }
-        root.addView(title)
-        root.addView(subtitle)
-        root.addView(android.view.View(this).apply { setBackgroundColor(palette.ink) },
-            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(0.5f).coerceAtLeast(2)))
-
-        entries.forEachIndexed { i, entry ->
-            val row = Ui.text(this, 6.4f * u).apply {
-                text = entry.label
-                gravity = Gravity.CENTER_VERTICAL
-                setPadding(px(3.4f), 0, px(3.4f), 0)
-                setOnClickListener { selected = i; render(); entry.action() }
-                // Tappable views become focusable by default, and OK would then click whichever row
-                // has Android's focus instead of the highlighted one. Keys are handled in onKeyDown.
-                isFocusable = false
-                isFocusableInTouchMode = false
-            }
-            root.addView(row, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(12f)))
-            rows += row
-        }
-
-        val info = Ui.text(this, 3.8f * u, singleLine = false).apply {
-            setTextColor(palette.muted)
-            setPadding(px(3.4f), px(4f), px(3.4f), 0)
-            val version = runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull()
-            text = "Doovdroid $version\nSettings file:\n${Config.file(this@AdminActivity)?.path ?: "(storage unavailable)"}"
-        }
-        root.addView(info)
-
-        // Soft-key labels above the two dash keys, as on the home screen.
-        root.addView(android.view.View(this), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
-        root.addView(android.view.View(this).apply { setBackgroundColor(palette.ink) },
-            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(0.5f).coerceAtLeast(2)))
-        val softBar = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(px(3.4f), 0, px(3.4f), 0)
-        }
-        for ((label, g) in listOf("Select" to Gravity.START, "Close" to Gravity.END)) {
-            softBar.addView(Ui.text(this, 5.8f * u, Ui.BOLD).apply { text = label; gravity = g; setTextColor(palette.ink) },
-                LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-        }
-        root.addView(softBar, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(9f)))
-
-        setContentView(root)
+        setContentView(screen.root)
         Ui.hideSystemBars(window)
         render()
     }
@@ -99,12 +50,8 @@ class AdminActivity : Activity() {
     }
 
     private fun render() {
-        subtitle.text = if (Admin.isUnlocked(this)) "Unlocked for ${Admin.minutesLeft(this)} more minutes" else "Locked"
-        rows.forEachIndexed { i, row ->
-            val sel = i == selected
-            row.setBackgroundColor(if (sel) palette.ink else Color.TRANSPARENT)
-            row.setTextColor(if (sel) palette.paper else palette.ink)
-        }
+        screen.setSubtitle(if (Admin.isUnlocked(this)) "Unlocked for ${Admin.minutesLeft(this)} more minutes" else "Locked")
+        screen.setRows(entries.map { it.label }, selected)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {

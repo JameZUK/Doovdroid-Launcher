@@ -298,11 +298,11 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
           <li>Messages, WhatsApp, Recent calls and Contacts open the phone's own apps. The right dash key backs out of them, and waking the phone always comes back here.</li>
           <li>The notification pull-down, Settings and the app store are blocked. Facebook, YouTube, Chrome and Gmail are switched off.</li>
           <li>Texts are typed with the keypad (T9), not an on-screen keyboard.</li>
-          <li>For you: typing <kbd>0000</kbd> and then a PIN on this screen opens an admin menu with Settings, unlocked for 15 minutes. No real phone number starts with 0000. This mockup uses <kbd>00009999</kbd>; the real PIN is set on the phone.</li>
+          <li>For you: typing <kbd>0000</kbd> and then a PIN on this screen opens an admin menu, unlocked for 15 minutes. It has a speed-dial editor for choosing who is on this screen and in what order, plus Settings. No real phone number starts with 0000. This mockup uses <kbd>00009999</kbd>; the real PIN is set on the phone.</li>
         </ul>
       </section>
 
-      <p class="fine">Names and counts are examples. On the phone, the six names come from a settings file kept on the phone itself, in the order you choose.</p>
+      <p class="fine">Names and counts are examples. On the phone, the people are chosen in the admin menu's speed-dial editor and kept on the phone itself.</p>
     </aside>
   </main>
 </div>
@@ -316,7 +316,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
     { key: "calls", label: "Recent calls" },
     { key: "contacts", label: "Contacts" },
   ];
-  const ADMIN = ["Settings", "Doov launcher", "Play Store", "Lock now"];
+  const ADMIN = ["Speed dial", "Settings", "Doov launcher", "Play Store", "Lock now"];
   const ADMIN_CODE = "00009999";
   const DIGITS = "0123456789";
   const ALL_KEYS = "0123456789*#";
@@ -448,12 +448,14 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
         break;
       case "app":
         nodes = [...header(), panel("Opening", state.app,
-          [`The phone's own ${state.app} app opens here.`, "Red key comes back."], false)];
+          state.app === "Speed dial"
+            ? ["Pick, reorder and remove the people on the home screen.", "Right dash key comes back."]
+            : [`The phone's own ${state.app} app opens here.`, "Red key comes back."], false)];
         break;
       case "admin": {
         const rows = h("div", { class: "rows" },
           ADMIN.map((label, i) => h("div", { class: "row" + (i === state.adminSel ? " sel" : "") }, h("span", { class: "label" }, label))),
-          [0, 1, 2].map(() => h("div", { class: "row" })));
+          [0, 1].map(() => h("div", { class: "row" })));
         nodes = [statusBar(), h("div", { class: "admin-head" }, h("strong", {}, "Admin"), h("span", {}, "Unlocked for 15 minutes")), rows, softbar("Select", "Close")];
         break;
       }

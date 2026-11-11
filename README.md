@@ -54,8 +54,9 @@ ssh -F ~/.ssh/config bench-laptop 'adb devices -l'
 
 Settings and everything else are hidden. Type **`0000` followed by the PIN** on the home screen
 (default PIN `3210`, so `00003210`; set your own with `pin=` in the settings file, see
-[`docs/admin.md`](docs/admin.md)) to open the admin menu: Settings, the original Doov launcher and
-the Play Store, unlocked for 15 minutes. `*` and `#` can't be part of it: on this phone they are
+[`docs/admin.md`](docs/admin.md)) to open the admin menu: Settings, the original Doov launcher,
+the Play Store, unlocked for 15 minutes, and a **Speed dial** editor for choosing who is on the
+home screen and in what order. `*` and `#` can't be part of it: on this phone they are
 volume keys whenever no text box has focus.
 
 ## Repo layout
