@@ -1,77 +1,60 @@
-# Doovdroid
+# Doovdroid Launcher
 
-A replacement home screen (launcher) that makes the Doov keypad Android phone work like an
-old Nokia 3210: one screen, driven entirely by the keypad, nothing to swipe, nothing to get
-lost in.
+A really simple home screen for Doov keypad Android phones, in the spirit of the old Nokia 3210:
+one screen, worked entirely with the keys, nothing to swipe and nothing to get lost in.
+
+<p>
+  <img src="docs/images/home.png" width="240" alt="The home screen: a big clock, six people to call, then Messages, WhatsApp, Recent calls and Contacts">
+  &nbsp;
+  <img src="docs/images/dialling.png" width="240" alt="Dialling a number: the number in large digits, with Call and Delete above the two soft keys">
+</p>
+
+## What it does
+
+- **One screen.** A big clock, up to 8 people to call, then Messages, WhatsApp, Recent calls and
+  Contacts. No pages, no scrolling, and touch is switched off.
+- **Keys only.** ▲ ▼ to choose, OK or green to call. Type digits to dial any number.
+- **Shows what's new.** Unread texts, unread WhatsApp messages and missed calls, on their rows.
+- **Hard to get lost.** Settings, the app store and the notification pull-down are kept out of
+  reach, and waking the phone always comes back to this screen.
+- **Easy to look after.** A hidden admin menu for the family: choose who is on the screen, open
+  Settings.
+
+## Documentation
+
+| Page | What's in it |
+|------|--------------|
+| [The home screen](docs/home-screen.md) | What's on the screen; calling, dialling and opening things |
+| [Keys](docs/keys.md) | What every key does, and this phone's odd ones |
+| [Admin menu](docs/admin-menu.md) | The hidden menu for the family |
+| [Speed dial](docs/speed-dial.md) | Choosing who is on the home screen |
+| [Settings file](docs/settings-file.md) | PIN, screen colours and speed dial as a text file |
+| [The guard](docs/guard.md) | How the phone is kept on the simple screen |
+| [Installing](docs/installing.md) | Build, install and set up a phone, and how to undo it all |
+| [Troubleshooting](docs/troubleshooting.md) | Things that can go wrong and what to do |
+| [The phone](docs/device.md) | Notes on the Doov hardware and its quirks |
+| [Development](docs/development.md) | Code layout, building, testing safely |
+
+There's also a clickable mockup: open [`docs/mockup.html`](docs/mockup.html) in a browser.
+
+## Quick start
+
+You need the Android SDK, JDK 17 or newer, and `adb`, with the phone plugged in and USB debugging on.
+
+```sh
+scripts/deploy.sh        # build and install the launcher
+scripts/setup-phone.sh   # make it the home screen and lock the phone down
+```
+
+Then open the admin menu on the phone (type `00003210`) and choose **Speed dial** to add people.
+[Installing](docs/installing.md) has the details, including how to put the phone back as it was.
 
 ## The phone
 
-A Doov-branded MediaTek keypad phone (reports as `alps` / `r77`), Android 14, 480×640 screen,
-full hardware keypad. Details, key map and quirks: [`docs/device.md`](docs/device.md).
+Built for, and tested on, a Doov keypad phone: MediaTek MT6765, Android 14, 480 × 640 screen, full
+hardware keypad (it reports itself as `alps r77`). Other Android 14 keypad phones may well work;
+the key quirks in [The phone](docs/device.md) are the things to check.
 
-It is plugged into USB on the bench laptop `bench-laptop` (`bench-laptop` in the home-lab SSH
-config); everything is driven with `adb` there over SSH:
+## Licence
 
-```sh
-ssh -F ~/.ssh/config bench-laptop 'adb devices -l'
-```
-
-## What the user sees
-
-```
-┌──────────────────────────┐
-│ ▂▄▆█ O2 - UK      ▮ 100% │
-│          20:48           │
-│     Wed 11 November      │
-│▓▓ Person 1 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  ← highlight bar, moved with ▲ ▼
-│   Person 2               │
-│   Person 3               │
-│   Person 4               │
-│   Person 5               │
-│   Person 6               │
-│   Messages            11 │
-│   WhatsApp            23 │
-│   Recent calls   2 missed│
-│   Contacts               │
-│──────────────────────────│
-│ Call                     │  ← what the left dash key does
-└──────────────────────────┘
-```
-
-- **One screen.** No pages, no scrolling; touch is ignored on the home screen.
-- **▲ ▼** move the highlight. **OK** or **green** calls the highlighted person, or opens the
-  highlighted item.
-- **The two dash keys** (blank soft keys either side of the D-pad) do what the bar at the bottom
-  of the screen says: left is **Call** / **Open**, right is **Delete** while dialling.
-- **Typing digits** starts dialling a number, shown large; green, OK or the left dash key calls it;
-  the right dash key deletes a digit (hold to clear).
-- **Red is the power key** on this phone. It hangs up a call; otherwise it turns the screen off,
-  and waking the phone always comes back to this screen.
-- Unread counts for Messages and WhatsApp, and missed calls, appear on their rows.
-- Lock screen: the phone's own, unchanged; the **left dash key** unlocks it.
-
-## Admin access
-
-Settings and everything else are hidden. Type **`0000` followed by the PIN** on the home screen
-(default PIN `3210`, so `00003210`; set your own with `pin=` in the settings file, see
-[`docs/admin.md`](docs/admin.md)) to open the admin menu: Settings, the original Doov launcher,
-the Play Store, unlocked for 15 minutes, and a **Speed dial** editor for choosing who is on the
-home screen and in what order. `*` and `#` can't be part of it: on this phone they are
-volume keys whenever no text box has focus.
-
-## Repo layout
-
-| Path | What |
-|------|------|
-| `app/` | The launcher app (Kotlin, framework APIs only, no AndroidX) |
-| `docs/mockup.html` | Interactive mockup of the home screen (published: https://claude.ai/artifact/JQ1YQoC5fXoZaYqUyvtSGe) |
-| `docs/device.md` | What the phone is: hardware, keys, installed software, quirks |
-| `docs/phone-changes.md` | **Every change made on the phone, with the command to undo it** |
-| `docs/admin.md` | Admin code, config file on the phone, how the guard works |
-| `scripts/` | Build, deploy and lock-down helpers |
-
-## Privacy
-
-The speed-dial list and anything else personal stays **on the phone** (config file under
-`/sdcard/Android/data/uk.me.jamez.doovdroid/files/`). No names-to-numbers, contacts, messages or
-screenshots of personal data go in this repo.
+[MIT](LICENSE).
