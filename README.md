@@ -56,6 +56,7 @@ the original Doov launcher, Play Store, for 15 minutes.
 | Path | What |
 |------|------|
 | `app/` | The launcher app (Kotlin, framework APIs only, no AndroidX) |
+| `docs/mockup.html` | Interactive mockup of the home screen (published: https://claude.ai/artifact/JQ1YQoC5fXoZaYqUyvtSGe) |
 | `docs/device.md` | What the phone is: hardware, keys, installed software, quirks |
 | `docs/phone-changes.md` | **Every change made on the phone, with the command to undo it** |
 | `docs/admin.md` | Admin code, config file on the phone, how the guard works |

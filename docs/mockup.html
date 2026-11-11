@@ -1,0 +1,555 @@
+<title>Doovdroid Launcher</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Roboto:wght@400;500;700&display=swap">
+<style>
+/* Layout: the phone on the left at roughly life-and-a-half size, the key guide beside it; stacks on narrow screens. */
+:root {
+  --bg: #eceee7;
+  --surface: #f7f8f3;
+  --ink: #1b1f17;
+  --muted: #5b6354;
+  --line: #d3d8ca;
+  --accent: #2c6a39;
+
+  /* The phone itself looks the same in either theme. */
+  --device: #1d2124;
+  --device-edge: #3a4044;
+  --key: #e4e6e0;
+  --key-ink: #1c201d;
+  --key-shade: #b9bdb4;
+  --key-green: #2f8a45;
+  --key-red: #c4382e;
+
+  /* Screen palettes (switched by data-style on the screen, not by the page theme). */
+  --scr-paper: #c9d9a6;
+  --scr-ink: #15230e;
+  --scr-muted: #4f6139;
+  --scr-alert: #8f1a10;
+
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --device-font: "Roboto", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121510; --surface: #1a1e17; --ink: #e6eadf; --muted: #9ca592; --line: #2e3429; --accent: #86c592;
+    --device-edge: #4b5257;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121510; --surface: #1a1e17; --ink: #e6eadf; --muted: #9ca592; --line: #2e3429; --accent: #86c592;
+  --device-edge: #4b5257;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.page {
+  max-width: 1040px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 48px;
+  display: grid; gap: 28px;
+}
+.eyebrow { margin: 0; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 4px 0 8px; font-family: var(--display); font-weight: 700; font-size: clamp(30px, 5vw, 44px); line-height: 1.05; letter-spacing: -.01em; text-wrap: balance; }
+.lede { margin: 0; max-width: 62ch; color: var(--muted); font-size: 16px; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 40px; align-items: start; }
+@media (max-width: 760px) { .layout { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 28px; } .guide { justify-self: stretch; } }
+
+/* ---------- The phone ---------- */
+.device-col { display: grid; justify-items: center; gap: 10px; width: 100%; }
+.phone {
+  width: min(340px, 100%);
+  background: linear-gradient(160deg, var(--device-edge), var(--device) 38%);
+  border-radius: 36px 36px 44px 44px;
+  padding: 16px 16px 22px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 18px 40px -18px rgba(0,0,0,.55);
+  display: grid; gap: 14px;
+  user-select: none; -webkit-user-select: none;
+}
+.earpiece { justify-self: center; width: 52px; height: 5px; border-radius: 3px; background: #0c0e0f; box-shadow: 0 1px 0 rgba(255,255,255,.07); }
+
+.screen {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--scr-paper);
+  color: var(--scr-ink);
+  font-family: var(--device-font);
+  box-shadow: 0 0 0 3px #090a0b;
+  display: flex; flex-direction: column;
+  cursor: not-allowed;
+}
+.screen[data-style="light"] { --scr-paper: #ffffff; --scr-ink: #101010; --scr-muted: #5c5c5c; --scr-alert: #b3261e; }
+.screen[data-style="dark"]  { --scr-paper: #0b0b0b; --scr-ink: #f3f3f3; --scr-muted: #a8a8a8; --scr-alert: #ff8f84; }
+.screen.off { background: #050505; }
+
+.status { display: flex; align-items: center; gap: 2cqw; height: 8cqw; padding: 0 3cqw; font-size: 4.4cqw; font-weight: 500; }
+.status .op { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status svg { height: 4.6cqw; width: auto; display: block; }
+.status svg .on { fill: var(--scr-ink); }
+.status svg .offbar { fill: var(--scr-ink); opacity: .22; }
+.status svg .outline { fill: none; stroke: var(--scr-ink); }
+.clock { text-align: center; font-size: 14cqw; line-height: 1.12; font-weight: 500; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.clock small { font-size: .42em; font-weight: 500; margin-left: .15em; }
+.clock.big { margin-top: 12cqw; font-size: 19cqw; }
+.date { text-align: center; font-size: 5.4cqw; line-height: 1.3; padding-bottom: 1.6cqw; border-bottom: .5cqw solid var(--scr-ink); margin: 0 3cqw; }
+.date.plain { border: 0; }
+
+.rows { flex: 1; display: flex; flex-direction: column; padding: .8cqw 0 0; }
+.row { flex: 1 1 0; min-height: 0; display: flex; align-items: center; gap: 2cqw; padding: 0 3.4cqw; font-size: 6cqw; font-weight: 500; }
+.row .label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .badge { font-size: .82em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.row .badge.alert { color: var(--scr-alert); font-weight: 700; }
+.row.sel { background: var(--scr-ink); color: var(--scr-paper); }
+.row.sel .badge.alert { color: var(--scr-paper); }
+.row.divide { border-top: .3cqw solid color-mix(in srgb, var(--scr-ink) 35%, transparent); }
+
+.dial { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 3cqw; padding: 0 4cqw; }
+.dial-label { font-size: 5cqw; color: var(--scr-muted); }
+.dial-num { font-size: 13cqw; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; word-break: break-all; }
+.dial-hint { font-size: 5cqw; line-height: 1.45; color: var(--scr-muted); }
+.dial-hint b { color: var(--scr-ink); font-weight: 700; }
+
+.panel { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 3cqw; padding: 0 6cqw; }
+.panel-kicker { font-size: 5.4cqw; color: var(--scr-muted); }
+.panel-title { font-size: 10cqw; font-weight: 700; line-height: 1.1; overflow-wrap: anywhere; }
+.panel-hint { font-size: 4.8cqw; color: var(--scr-muted); line-height: 1.4; }
+.panel-dots::after { content: ""; animation: dots 1.4s steps(4, end) infinite; }
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+@media (prefers-reduced-motion: reduce) { .panel-dots::after { animation: none; content: "..."; } }
+
+.lock-hint { margin-top: auto; text-align: center; font-size: 5.4cqw; padding: 3cqw 0 5cqw; }
+.lock-hint b { display: inline-block; padding: .2em .6em; border: .5cqw solid var(--scr-ink); border-radius: 1.4cqw; }
+
+.admin-head { padding: 3cqw 3.4cqw 2cqw; border-bottom: .5cqw solid var(--scr-ink); }
+.admin-head strong { display: block; font-size: 7cqw; }
+.admin-head span { font-size: 4.6cqw; color: var(--scr-muted); }
+
+/* ---------- Keypad ---------- */
+.keypad { display: grid; gap: 10px; }
+.nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.side { display: grid; gap: 10px; }
+.key {
+  appearance: none; border: 0; cursor: pointer;
+  font: 500 15px/1 var(--body);
+  color: var(--key-ink);
+  background: linear-gradient(var(--key), color-mix(in srgb, var(--key) 82%, var(--key-shade)));
+  box-shadow: 0 2px 0 var(--key-shade), 0 3px 6px -2px rgba(0,0,0,.6);
+  border-radius: 10px;
+  min-height: 40px;
+  display: grid; place-items: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.key:active, .key.down { transform: translateY(2px); box-shadow: 0 0 0 var(--key-shade), 0 1px 3px -1px rgba(0,0,0,.6); }
+.key:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.key.soft { font-size: 13px; border-radius: 10px 10px 14px 14px; }
+.key.green { background: var(--key-green); color: #fff; box-shadow: 0 2px 0 #1d5c2c, 0 3px 6px -2px rgba(0,0,0,.6); }
+.key.red { background: var(--key-red); color: #fff; box-shadow: 0 2px 0 #852219, 0 3px 6px -2px rgba(0,0,0,.6); }
+.key svg { width: 22px; height: 22px; fill: currentColor; }
+
+.dpad { position: relative; width: 116px; height: 116px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #3b4246, #23282b); box-shadow: 0 0 0 2px #121517, 0 4px 10px -4px rgba(0,0,0,.7); display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+.dpad .arrow { appearance: none; border: 0; background: transparent; color: #d8dcd4; font-size: 14px; cursor: pointer; border-radius: 12px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.dpad .arrow:active, .dpad .arrow.down { color: #fff; background: rgba(255,255,255,.08); }
+.dpad .arrow:focus-visible { outline: 3px solid var(--accent); }
+.dpad .up { grid-area: 1 / 2; } .dpad .left { grid-area: 2 / 1; } .dpad .right { grid-area: 2 / 3; } .dpad .downkey { grid-area: 3 / 2; }
+.dpad .ok { grid-area: 2 / 2; align-self: center; justify-self: center; width: 46px; height: 46px; border-radius: 50%; min-height: 0; font-weight: 600; font-size: 13px; }
+
+.numbers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.numbers .key { min-height: 42px; grid-auto-flow: column; gap: 6px; }
+.numbers .key b { font: 600 19px/1 var(--device-font); }
+.numbers .key i { font: 500 9.5px/1 var(--mono); font-style: normal; color: #5c6259; letter-spacing: .04em; }
+
+.touch-note { margin: 0; font-size: 13px; color: var(--muted); min-height: 1.5em; }
+
+/* ---------- Guide ---------- */
+.guide { display: grid; gap: 26px; min-width: 0; }
+.guide h2 { margin: 0 0 10px; font-family: var(--display); font-weight: 600; font-size: 20px; letter-spacing: -.005em; }
+.keys { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; align-items: baseline; }
+.keys dt { font: 500 12px/1.2 var(--mono); padding: 4px 8px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); justify-self: start; }
+.keys dt.g { color: #fff; background: var(--key-green); border-color: transparent; }
+.keys dt.r { color: #fff; background: var(--key-red); border-color: transparent; }
+.keys dd { margin: 0; min-width: 0; }
+
+.try { display: grid; gap: 14px; }
+.ctl-label { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.seg button { appearance: none; border: 0; background: transparent; color: var(--ink); font: 500 14px/1 var(--body); padding: 9px 14px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg button:focus-visible, .chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 14px/1 var(--body); padding: 9px 14px; border-radius: 999px; cursor: pointer; }
+.chip:hover { border-color: var(--muted); }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.notes { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; max-width: 62ch; }
+.notes li { padding-left: 16px; position: relative; }
+.notes li::before { content: ""; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.fine { margin: 0; font-size: 13px; color: var(--muted); max-width: 62ch; }
+kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+</style>
+
+<div class="page">
+  <header>
+    <p class="eyebrow">Mockup · Doov keypad phone · 480 × 640 screen</p>
+    <h1>Doovdroid Launcher</h1>
+    <p class="lede">The home screen we're building for the Doov phone. It's one screen, worked entirely with the keys. Press the keys under the screen to try it, or use your keyboard. Tapping the screen does nothing here, the same as on the phone.</p>
+  </header>
+
+  <main class="layout">
+    <section class="device-col" aria-label="Phone mockup">
+      <div class="phone">
+        <div class="earpiece" aria-hidden="true"></div>
+        <div class="screen" id="screen" data-style="lcd" aria-live="polite" aria-label="Phone screen"></div>
+        <div class="keypad">
+          <div class="nav">
+            <div class="side">
+              <button class="key soft" data-key="menu" aria-label="Menu (left soft key)">Menu</button>
+              <button class="key green" data-key="green" aria-label="Green key: call">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>
+              </button>
+            </div>
+            <div class="dpad" role="group" aria-label="Navigation keys">
+              <button class="arrow up" data-key="up" aria-label="Up">▲</button>
+              <button class="arrow left" data-key="left" aria-label="Left">◀</button>
+              <button class="key ok" data-key="ok" aria-label="OK">OK</button>
+              <button class="arrow right" data-key="right" aria-label="Right">▶</button>
+              <button class="arrow downkey" data-key="down" aria-label="Down">▼</button>
+            </div>
+            <div class="side">
+              <button class="key soft" data-key="back" aria-label="Back (right soft key)">Back</button>
+              <button class="key red" data-key="red" aria-label="Red key: end, home">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9c-1.6 0-3.1.3-4.5.7v3.1c0 .4-.2.7-.6.9-1 .5-1.9 1.1-2.7 1.8-.2.2-.4.3-.7.3s-.5-.1-.7-.3L.3 13.1A1 1 0 0 1 0 12.4c0-.3.1-.5.3-.7C3.3 8.8 7.4 7 12 7s8.7 1.8 11.7 4.7c.2.2.3.4.3.7s-.1.5-.3.7l-2.5 2.5c-.2.2-.4.3-.7.3s-.5-.1-.7-.3c-.8-.7-1.7-1.3-2.7-1.8-.3-.2-.6-.5-.6-.9V9.7C15.1 9.3 13.6 9 12 9z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="numbers" role="group" aria-label="Number keys">
+            <button class="key" data-key="1"><b>1</b><i>oo</i></button>
+            <button class="key" data-key="2"><b>2</b><i>ABC</i></button>
+            <button class="key" data-key="3"><b>3</b><i>DEF</i></button>
+            <button class="key" data-key="4"><b>4</b><i>GHI</i></button>
+            <button class="key" data-key="5"><b>5</b><i>JKL</i></button>
+            <button class="key" data-key="6"><b>6</b><i>MNO</i></button>
+            <button class="key" data-key="7"><b>7</b><i>PQRS</i></button>
+            <button class="key" data-key="8"><b>8</b><i>TUV</i></button>
+            <button class="key" data-key="9"><b>9</b><i>WXYZ</i></button>
+            <button class="key" data-key="*"><b>*</b></button>
+            <button class="key" data-key="0"><b>0</b><i>+</i></button>
+            <button class="key" data-key="#"><b>#</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="touch-note" id="touchNote" aria-live="polite"></p>
+    </section>
+
+    <aside class="guide">
+      <section>
+        <h2>The keys</h2>
+        <dl class="keys">
+          <dt>▲ ▼</dt><dd>Move the highlight up and down the list. Nothing scrolls; everything is on the one screen.</dd>
+          <dt>OK</dt><dd>Call the highlighted person, or open the highlighted item.</dd>
+          <dt class="g">Green</dt><dd>Same as OK: calls the highlighted person, or the number you've typed.</dd>
+          <dt>0–9 * #</dt><dd>Start typing a phone number. Hold <b>0</b> for <b>+</b>.</dd>
+          <dt>Back</dt><dd>Delete the last digit. Hold it to clear the number.</dd>
+          <dt class="r">Red</dt><dd>Ends a call, and always comes back to this screen. Pressed on this screen, it turns the screen off.</dd>
+          <dt>Menu</dt><dd>Unlocks the lock screen (the phone's own keypad lock, unchanged).</dd>
+        </dl>
+      </section>
+
+      <section class="try">
+        <h2>Try it</h2>
+        <div>
+          <p class="ctl-label">Screen colours</p>
+          <div class="seg" role="group" aria-label="Screen colours">
+            <button id="style-lcd" data-style="lcd" aria-pressed="true">LCD green</button>
+            <button id="style-light" data-style="light" aria-pressed="false">Black on white</button>
+            <button id="style-dark" data-style="dark" aria-pressed="false">White on black</button>
+          </div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="examples" checked> Show new messages and a missed call</label>
+        <div class="chips">
+          <button class="chip" id="demo-dial">Type a number</button>
+          <button class="chip" id="demo-off">Lock the phone</button>
+          <button class="chip" id="demo-admin">Open the admin menu</button>
+        </div>
+        <p class="fine">On a computer: arrow keys, <kbd>Enter</kbd> for OK, <kbd>Backspace</kbd> for Back, <kbd>Esc</kbd> for the red key, and digits to dial.</p>
+      </section>
+
+      <section>
+        <h2>What it hands over to</h2>
+        <ul class="notes">
+          <li>Calls use the phone's own call screen. Green answers, red hangs up, as now.</li>
+          <li>Messages, WhatsApp, Recent calls and Contacts open the phone's own apps. The red key always comes back here.</li>
+          <li>The notification pull-down, Settings and the app store are blocked. Facebook, YouTube, Chrome and Gmail are switched off.</li>
+          <li>Texts are typed with the keypad (T9), not an on-screen keyboard.</li>
+          <li>For you: a hidden code typed on this screen opens an admin menu with Settings, unlocked for 15 minutes. This mockup uses <kbd>*#0000#</kbd>; the real code is set on the phone.</li>
+        </ul>
+      </section>
+
+      <p class="fine">Names and counts are examples. On the phone, the six names come from a settings file kept on the phone itself, in the order you choose.</p>
+    </aside>
+  </main>
+</div>
+
+<script>
+(() => {
+  const PEOPLE = ["Alice", "Ben", "Carol", "David M", "Emma S", "Frank Hollingworth"];
+  const APPS = [
+    { key: "messages", label: "Messages" },
+    { key: "whatsapp", label: "WhatsApp" },
+    { key: "calls", label: "Recent calls" },
+    { key: "contacts", label: "Contacts" },
+  ];
+  const ADMIN = ["Settings", "Doov launcher", "Play Store", "Lock now"];
+  const ADMIN_CODE = "*#0000#";
+  const DIGITS = "0123456789*#";
+  const SVGNS = "http://www.w3.org/2000/svg";
+
+  const items = [
+    ...PEOPLE.map(name => ({ type: "person", label: name })),
+    ...APPS.map(a => ({ type: "app", key: a.key, label: a.label })),
+  ];
+
+  const state = { mode: "home", sel: 0, dial: "", target: "", app: "", adminSel: 0, examples: true, missed: 1 };
+  const screen = document.getElementById("screen");
+  const note = document.getElementById("touchNote");
+
+  // Small DOM builders: h() for HTML elements, s() for SVG. Text always goes in as text nodes.
+  function h(tag, props, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (k === "class") el.className = v; else el.setAttribute(k, v);
+    }
+    for (const c of kids.flat()) if (c !== null && c !== undefined && c !== false) el.append(c);
+    return el;
+  }
+  function s(tag, attrs, ...kids) {
+    const el = document.createElementNS(SVGNS, tag);
+    for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, String(v));
+    kids.forEach(c => el.append(c));
+    return el;
+  }
+
+  function timeParts() {
+    const d = new Date();
+    let hr = d.getHours(); const m = String(d.getMinutes()).padStart(2, "0");
+    const ap = hr >= 12 ? "pm" : "am"; hr = hr % 12 || 12;
+    const date = d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+    return { time: `${hr}:${m}`, ap, date };
+  }
+
+  function statusBar() {
+    const bars = [1, 2, 3, 4].map((n, i) =>
+      s("rect", { class: n <= 3 ? "on" : "offbar", x: i * 6, y: 16 - n * 4, width: 4, height: n * 4, rx: 0.6 }));
+    const signal = s("svg", { viewBox: "0 0 22 16", "aria-label": "Signal 3 of 4" }, ...bars);
+    const battery = s("svg", { viewBox: "0 0 30 16", "aria-label": "Battery 86 percent" },
+      s("rect", { class: "outline", x: 1, y: 1.5, width: 25, height: 13, rx: 2, "stroke-width": 2 }),
+      s("rect", { class: "on", x: 27, y: 5, width: 2.5, height: 6, rx: 1 }),
+      s("rect", { class: "on", x: 4, y: 4.5, width: Math.round(19 * 0.86), height: 7, rx: 0.8 }));
+    return h("div", { class: "status" }, signal, h("span", { class: "op" }, "O2 - UK"), battery, h("span", {}, "86%"));
+  }
+
+  function clock(extraClass) {
+    const t = timeParts();
+    return [
+      h("div", { class: "clock" + (extraClass ? " " + extraClass : "") }, t.time, h("small", {}, t.ap)),
+      h("div", { class: "date" + (extraClass ? " plain" : "") }, t.date),
+    ];
+  }
+
+  function header() { return [statusBar(), ...clock()]; }
+
+  function badgeFor(item) {
+    if (item.type !== "app" || !state.examples) return { text: "", alert: false };
+    if (item.key === "messages") return { text: "2", alert: true };
+    if (item.key === "whatsapp") return { text: "19", alert: true };
+    if (item.key === "calls" && state.missed > 0) return { text: `${state.missed} missed`, alert: true };
+    return { text: "", alert: false };
+  }
+
+  function panel(kicker, title, hintLines, dots) {
+    const k = h("div", { class: "panel-kicker" }, kicker);
+    if (dots) k.append(h("span", { class: "panel-dots" }));
+    const hint = h("div", { class: "panel-hint" });
+    hintLines.forEach((line, i) => { if (i) hint.append(h("br")); hint.append(line); });
+    return h("div", { class: "panel" }, k, h("div", { class: "panel-title" }, title), hint);
+  }
+
+  function render() {
+    screen.classList.toggle("off", state.mode === "off");
+    let nodes = [];
+    switch (state.mode) {
+      case "off":
+        break;
+      case "lock":
+        nodes = [statusBar(), ...clock("big"),
+          h("div", { class: "lock-hint" }, "Press ", h("b", {}, "Menu"), " to unlock")];
+        break;
+      case "home": {
+        const rows = h("div", { class: "rows" }, items.map((it, i) => {
+          const b = badgeFor(it);
+          const cls = ["row", i === state.sel ? "sel" : "", i === PEOPLE.length ? "divide" : ""].join(" ").trim();
+          return h("div", { class: cls },
+            h("span", { class: "label" }, it.label),
+            h("span", { class: "badge" + (b.alert ? " alert" : "") }, b.text));
+        }));
+        nodes = [...header(), rows];
+        break;
+      }
+      case "dial": {
+        const len = Math.max(state.dial.length, 1);
+        const size = Math.min(13, 88 / (len * 0.58));
+        nodes = [...header(), h("div", { class: "dial" },
+          h("div", { class: "dial-label" }, "Number"),
+          h("div", { class: "dial-num", style: `font-size:${size.toFixed(2)}cqw` }, state.dial),
+          h("div", { class: "dial-hint" }, h("b", {}, "Green"), " to call", h("br"), h("b", {}, "Back"), " to delete"))];
+        break;
+      }
+      case "call":
+        nodes = [...header(), panel("Calling", state.target,
+          ["The phone's own call screen takes over here.", "Red key ends the call."], true)];
+        break;
+      case "app":
+        nodes = [...header(), panel("Opening", state.app,
+          [`The phone's own ${state.app} app opens here.`, "Red key comes back."], false)];
+        break;
+      case "admin": {
+        const rows = h("div", { class: "rows" },
+          ADMIN.map((label, i) => h("div", { class: "row" + (i === state.adminSel ? " sel" : "") }, h("span", { class: "label" }, label))),
+          [0, 1, 2, 3].map(() => h("div", { class: "row" })));
+        nodes = [statusBar(), h("div", { class: "admin-head" }, h("strong", {}, "Admin"), h("span", {}, "Unlocked for 15 minutes")), rows];
+        break;
+      }
+    }
+    screen.replaceChildren(...nodes);
+  }
+
+  function home() { state.mode = "home"; state.dial = ""; render(); }
+
+  function activate(item) {
+    if (item.type === "person") { state.target = item.label; state.mode = "call"; }
+    else {
+      state.app = item.label; state.mode = "app";
+      if (item.key === "calls") state.missed = 0;
+    }
+    render();
+  }
+
+  function press(k) {
+    const m = state.mode;
+    if (m === "off") { state.mode = "lock"; return render(); }
+    if (m === "lock") {
+      if (k === "menu") { state.sel = 0; return home(); }
+      if (k === "red") { state.mode = "off"; return render(); }
+      return;
+    }
+    if (k === "red") {
+      if (m === "home") { state.mode = "off"; return render(); }
+      state.sel = 0; return home();
+    }
+    if (m === "home") {
+      if (k === "up") state.sel = (state.sel - 1 + items.length) % items.length;
+      else if (k === "down") state.sel = (state.sel + 1) % items.length;
+      else if (k === "ok" || k === "green") return activate(items[state.sel]);
+      else if (DIGITS.includes(k)) { state.mode = "dial"; state.dial = k; }
+      return render();
+    }
+    if (m === "dial") {
+      if (DIGITS.includes(k)) {
+        if (state.dial.length < 20) state.dial += k;
+        if (k === "#" && state.dial === ADMIN_CODE) { state.dial = ""; state.adminSel = 0; state.mode = "admin"; }
+      } else if (k === "back") {
+        state.dial = state.dial.slice(0, -1);
+        if (!state.dial) return home();
+      } else if (k === "back-long") { return home(); }
+      else if (k === "0-long") { if (state.dial.endsWith("0")) state.dial = state.dial.slice(0, -1) + "+"; }
+      else if (k === "ok" || k === "green") { state.target = state.dial; state.dial = ""; state.mode = "call"; }
+      return render();
+    }
+    if (m === "admin") {
+      if (k === "up") state.adminSel = (state.adminSel - 1 + ADMIN.length) % ADMIN.length;
+      else if (k === "down") state.adminSel = (state.adminSel + 1) % ADMIN.length;
+      else if (k === "back") return home();
+      else if (k === "ok" || k === "green") {
+        const choice = ADMIN[state.adminSel];
+        if (choice === "Lock now") return home();
+        state.app = choice; state.mode = "app";
+      }
+      return render();
+    }
+    if (m === "app" && k === "back") { state.sel = 0; return home(); }
+  }
+
+  // Keys: click for a normal press; holding Back or 0 for 600 ms gives the long press.
+  const LONG = { back: "back-long", "0": "0-long" };
+  document.querySelectorAll("[data-key]").forEach(btn => {
+    const k = btn.dataset.key;
+    let timer = null, longFired = false;
+    btn.addEventListener("pointerdown", () => {
+      longFired = false;
+      if (LONG[k]) timer = setTimeout(() => {
+        longFired = true;
+        if (k === "0" && state.mode === "home") press("0");
+        else if (k === "0") press("0");
+        press(LONG[k]);
+      }, 600);
+    });
+    const cancel = () => { clearTimeout(timer); timer = null; };
+    btn.addEventListener("pointerup", cancel);
+    btn.addEventListener("pointerleave", cancel);
+    btn.addEventListener("click", () => { if (longFired) { longFired = false; return; } press(k); });
+  });
+
+  // Touch is off on the real home screen.
+  let noteTimer;
+  screen.addEventListener("click", () => {
+    note.textContent = "Touch is switched off. Use the keys.";
+    clearTimeout(noteTimer); noteTimer = setTimeout(() => { note.textContent = ""; }, 2200);
+  });
+
+  // Computer keyboard.
+  const KEYMAP = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", Enter: "ok", Backspace: "back", Escape: "red" };
+  document.addEventListener("keydown", e => {
+    const t = e.target;
+    if (t && t.closest && t.closest("input, .seg, .chip")) return;
+    const k = KEYMAP[e.key] || (DIGITS.includes(e.key) && e.key.length === 1 ? e.key : null);
+    if (!k) return;
+    if ((e.key === "Enter" || e.key === " ") && t && t.closest && t.closest("[data-key]")) return; // the button's own click handles it
+    e.preventDefault();
+    const btn = document.querySelector(`[data-key="${CSS.escape(k)}"]`);
+    if (btn) { btn.classList.add("down"); setTimeout(() => btn.classList.remove("down"), 120); }
+    press(k);
+  });
+
+  // Controls.
+  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+    screen.dataset.style = b.dataset.style;
+    document.querySelectorAll(".seg button").forEach(o => o.setAttribute("aria-pressed", String(o === b)));
+  }));
+  document.getElementById("examples").addEventListener("change", e => {
+    state.examples = e.target.checked; if (state.examples && state.missed === 0) state.missed = 1; render();
+  });
+  function typeOut(text, gap) {
+    state.mode = "home"; state.dial = ""; render();
+    let i = 0;
+    const step = () => { if (i < text.length) { press(text[i++]); setTimeout(step, gap); } };
+    step();
+  }
+  document.getElementById("demo-dial").addEventListener("click", () => typeOut("07700900123", 110));
+  document.getElementById("demo-off").addEventListener("click", () => { state.mode = "off"; state.dial = ""; render(); });
+  document.getElementById("demo-admin").addEventListener("click", () => typeOut(ADMIN_CODE, 130));
+
+  render();
+  setInterval(() => { if (state.mode !== "off") render(); }, 15000);
+})();
+</script>
