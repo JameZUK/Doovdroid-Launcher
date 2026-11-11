@@ -39,13 +39,22 @@ There is no device-specific key layout (`mtk-kpd.kl` absent), so `Generic.kl` ap
 | `*` / `#` | `KEY_NUMERIC_STAR` / `KEY_NUMERIC_POUND` | `KEYCODE_STAR` / `KEYCODE_POUND` |
 | D-pad | `KEY_UP/DOWN/LEFT/RIGHT` | `KEYCODE_DPAD_*` |
 | OK | `KEY_ENTER` | `KEYCODE_ENTER` |
-| Green | `KEY_SEND` | `KEYCODE_CALL` |
-| Red | `KEY_END` | `KEYCODE_ENDCALL` (handled by the system; apps never see it) |
-| Left / right soft keys | `KEY_MENU` / `KEY_BACK` (assumed: Menu unlocks the lock screen) | `KEYCODE_MENU` / `KEYCODE_BACK` |
-| Side | `KEY_VOLUMEUP/DOWN`, `KEY_POWER` | |
-| ? | `KEY_H`, `KEY_B` | advertised by `mtk-kpd`; no physical key found yet. **TODO** confirm |
+| Green | `KEY_SEND` (assumed, not yet pressed in a capture) | `KEYCODE_CALL` |
+| **Red** | **`KEY_POWER`** on `mtk-pmic-keys` — the red key *is* the power key (confirmed 2026-11-11) | `KEYCODE_POWER` (system: screen off/on, hold for the power menu) |
+| Left dash (soft key) | `KEY_MENU` on `mtk-kpd` (confirmed) | `KEYCODE_MENU`; also unlocks the lock screen |
+| Right dash (soft key) | `KEY_BACK` on `mtk-kpd` (confirmed) | `KEYCODE_BACK` |
+| Side | `KEY_VOLUMEUP/DOWN` | |
+| — | `KEY_END`, `KEY_H`, `KEY_B` | advertised by `mtk-kpd` but no physical key sends them |
 
-**Red key behaviour** is `Settings.System.end_button_behavior` (stock value `2` = sleep).
+The two keys either side of the D-pad are blank soft keys marked with a dash; the screen has to
+say what they do (the launcher's bottom bar).
+
+Because red is the power key, `end_button_behavior` (stock `2`) does nothing here. In a call the red
+key follows `Settings.Secure.incall_power_button_behavior` (stock unset = `1`, screen off; `2` =
+hang up).
+
+**Confirmed with a guided capture**: `scripts/adb.sh shell getevent -lt` (takes no device list, or
+exactly one device) while someone presses each key a different number of times.
 
 ## Software as found
 

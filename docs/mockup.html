@@ -104,7 +104,7 @@ h1 { margin: 4px 0 8px; font-family: var(--display); font-weight: 700; font-size
 .date.plain { border: 0; }
 
 .rows { flex: 1; display: flex; flex-direction: column; padding: .8cqw 0 0; }
-.row { flex: 1 1 0; min-height: 0; display: flex; align-items: center; gap: 2cqw; padding: 0 3.4cqw; font-size: 6cqw; font-weight: 500; }
+.row { flex: 1 1 0; min-height: 0; display: flex; align-items: center; gap: 2cqw; padding: 0 3.4cqw; font-size: 5.6cqw; font-weight: 500; }
 .row .label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row .badge { font-size: .82em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .row .badge.alert { color: var(--scr-alert); font-weight: 700; }
@@ -133,6 +133,11 @@ h1 { margin: 4px 0 8px; font-family: var(--display); font-weight: 700; font-size
 .admin-head strong { display: block; font-size: 7cqw; }
 .admin-head span { font-size: 4.6cqw; color: var(--scr-muted); }
 
+.softbar { display: flex; justify-content: space-between; align-items: center; height: 9cqw; flex: none; padding: 0 3.4cqw; border-top: .5cqw solid var(--scr-ink); font-size: 5.8cqw; font-weight: 700; }
+.padlock { width: 8cqw; height: 8cqw; display: block; margin: 0 auto; }
+.padlock .body { fill: var(--scr-ink); }
+.padlock .shackle { fill: none; stroke: var(--scr-ink); stroke-width: 2; }
+
 /* ---------- Keypad ---------- */
 .keypad { display: grid; gap: 10px; }
 .nav { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
@@ -151,7 +156,7 @@ h1 { margin: 4px 0 8px; font-family: var(--display); font-weight: 700; font-size
 }
 .key:active, .key.down { transform: translateY(2px); box-shadow: 0 0 0 var(--key-shade), 0 1px 3px -1px rgba(0,0,0,.6); }
 .key:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.key.soft { font-size: 13px; border-radius: 10px 10px 14px 14px; }
+.key.soft { font-size: 22px; font-weight: 600; border-radius: 10px 10px 14px 14px; }
 .key.green { background: var(--key-green); color: #fff; box-shadow: 0 2px 0 #1d5c2c, 0 3px 6px -2px rgba(0,0,0,.6); }
 .key.red { background: var(--key-red); color: #fff; box-shadow: 0 2px 0 #852219, 0 3px 6px -2px rgba(0,0,0,.6); }
 .key svg { width: 22px; height: 22px; fill: currentColor; }
@@ -214,7 +219,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
         <div class="keypad">
           <div class="nav">
             <div class="side">
-              <button class="key soft" data-key="menu" aria-label="Menu (left soft key)">Menu</button>
+              <button class="key soft" data-key="menu" aria-label="Left soft key">–</button>
               <button class="key green" data-key="green" aria-label="Green key: call">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>
               </button>
@@ -227,8 +232,8 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
               <button class="arrow downkey" data-key="down" aria-label="Down">▼</button>
             </div>
             <div class="side">
-              <button class="key soft" data-key="back" aria-label="Back (right soft key)">Back</button>
-              <button class="key red" data-key="red" aria-label="Red key: end, home">
+              <button class="key soft" data-key="back" aria-label="Right soft key">–</button>
+              <button class="key red" data-key="red" aria-label="Red key: end call, power">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9c-1.6 0-3.1.3-4.5.7v3.1c0 .4-.2.7-.6.9-1 .5-1.9 1.1-2.7 1.8-.2.2-.4.3-.7.3s-.5-.1-.7-.3L.3 13.1A1 1 0 0 1 0 12.4c0-.3.1-.5.3-.7C3.3 8.8 7.4 7 12 7s8.7 1.8 11.7 4.7c.2.2.3.4.3.7s-.1.5-.3.7l-2.5 2.5c-.2.2-.4.3-.7.3s-.5-.1-.7-.3c-.8-.7-1.7-1.3-2.7-1.8-.3-.2-.6-.5-.6-.9V9.7C15.1 9.3 13.6 9 12 9z"/></svg>
               </button>
             </div>
@@ -258,11 +263,11 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
         <dl class="keys">
           <dt>▲ ▼</dt><dd>Move the highlight up and down the list. Nothing scrolls; everything is on the one screen.</dd>
           <dt>OK</dt><dd>Call the highlighted person, or open the highlighted item.</dd>
-          <dt class="g">Green</dt><dd>Same as OK: calls the highlighted person, or the number you've typed.</dd>
+          <dt>Left –</dt><dd>Does what the bar at the bottom of the screen says above it: <b>Call</b>, <b>Open</b> or <b>Select</b>. It also unlocks the lock screen.</dd>
+          <dt>Right –</dt><dd>Does what the bar says above it: <b>Delete</b> a digit while dialling (hold it to clear the number), <b>Close</b> in the admin menu. Inside other apps it goes back.</dd>
+          <dt class="g">Green</dt><dd>Calls the highlighted person, or the number you've typed.</dd>
           <dt>0–9 * #</dt><dd>Start typing a phone number. Hold <b>0</b> for <b>+</b>.</dd>
-          <dt>Back</dt><dd>Delete the last digit. Hold it to clear the number.</dd>
-          <dt class="r">Red</dt><dd>Ends a call, and always comes back to this screen. Pressed on this screen, it turns the screen off.</dd>
-          <dt>Menu</dt><dd>Unlocks the lock screen (the phone's own keypad lock, unchanged).</dd>
+          <dt class="r">Red</dt><dd>This is also the power key. It hangs up a call. Otherwise it turns the screen off, and waking the phone always comes back to this screen. Hold it for the power menu.</dd>
         </dl>
       </section>
 
@@ -282,14 +287,14 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
           <button class="chip" id="demo-off">Lock the phone</button>
           <button class="chip" id="demo-admin">Open the admin menu</button>
         </div>
-        <p class="fine">On a computer: arrow keys, <kbd>Enter</kbd> for OK, <kbd>Backspace</kbd> for Back, <kbd>Esc</kbd> for the red key, and digits to dial.</p>
+        <p class="fine">On a computer: arrow keys, <kbd>Enter</kbd> for OK, <kbd>Backspace</kbd> for the right dash key, <kbd>Esc</kbd> for the red key, and digits to dial.</p>
       </section>
 
       <section>
         <h2>What it hands over to</h2>
         <ul class="notes">
-          <li>Calls use the phone's own call screen. Green answers, red hangs up, as now.</li>
-          <li>Messages, WhatsApp, Recent calls and Contacts open the phone's own apps. The red key always comes back here.</li>
+          <li>Calls use the phone's own call screen. Green answers, red hangs up.</li>
+          <li>Messages, WhatsApp, Recent calls and Contacts open the phone's own apps. The right dash key backs out of them, and waking the phone always comes back here.</li>
           <li>The notification pull-down, Settings and the app store are blocked. Facebook, YouTube, Chrome and Gmail are switched off.</li>
           <li>Texts are typed with the keypad (T9), not an on-screen keyboard.</li>
           <li>For you: a hidden code typed on this screen opens an admin menu with Settings, unlocked for 15 minutes. This mockup uses <kbd>*#0000#</kbd>; the real code is set on the phone.</li>
@@ -323,6 +328,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
   const state = { mode: "home", sel: 0, dial: "", target: "", app: "", adminSel: 0, examples: true, missed: 1 };
   const screen = document.getElementById("screen");
   const note = document.getElementById("touchNote");
+  let touchNoteUntil = 0;
 
   // Small DOM builders: h() for HTML elements, s() for SVG. Text always goes in as text nodes.
   function h(tag, props, ...kids) {
@@ -377,6 +383,17 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
     return { text: "", alert: false };
   }
 
+  // The labels above the two dash keys.
+  function softbar(left, right) {
+    return h("div", { class: "softbar" }, h("span", {}, left), h("span", {}, right));
+  }
+
+  function padlock() {
+    return s("svg", { viewBox: "0 0 24 24", class: "padlock", "aria-label": "Locked" },
+      s("rect", { class: "body", x: 5, y: 11, width: 14, height: 10, rx: 2 }),
+      s("path", { class: "shackle", d: "M8 11V8a4 4 0 0 1 8 0v3" }));
+  }
+
   function panel(kicker, title, hintLines, dots) {
     const k = h("div", { class: "panel-kicker" }, kicker);
     if (dots) k.append(h("span", { class: "panel-dots" }));
@@ -392,8 +409,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
       case "off":
         break;
       case "lock":
-        nodes = [statusBar(), ...clock("big"),
-          h("div", { class: "lock-hint" }, "Press ", h("b", {}, "Menu"), " to unlock")];
+        nodes = [statusBar(), ...clock("big"), h("div", { class: "lock-hint" }, padlock())];
         break;
       case "home": {
         const rows = h("div", { class: "rows" }, items.map((it, i) => {
@@ -403,7 +419,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
             h("span", { class: "label" }, it.label),
             h("span", { class: "badge" + (b.alert ? " alert" : "") }, b.text));
         }));
-        nodes = [...header(), rows];
+        nodes = [...header(), rows, softbar(items[state.sel].type === "person" ? "Call" : "Open", "")];
         break;
       }
       case "dial": {
@@ -412,7 +428,8 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
         nodes = [...header(), h("div", { class: "dial" },
           h("div", { class: "dial-label" }, "Number"),
           h("div", { class: "dial-num", style: `font-size:${size.toFixed(2)}cqw` }, state.dial),
-          h("div", { class: "dial-hint" }, h("b", {}, "Green"), " to call", h("br"), h("b", {}, "Back"), " to delete"))];
+          h("div", { class: "dial-hint" }, h("b", {}, "Green"), " to call", h("br"), "Hold ", h("b", {}, "Delete"), " to clear")),
+          softbar("Call", "Delete")];
         break;
       }
       case "call":
@@ -426,12 +443,15 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
       case "admin": {
         const rows = h("div", { class: "rows" },
           ADMIN.map((label, i) => h("div", { class: "row" + (i === state.adminSel ? " sel" : "") }, h("span", { class: "label" }, label))),
-          [0, 1, 2, 3].map(() => h("div", { class: "row" })));
-        nodes = [statusBar(), h("div", { class: "admin-head" }, h("strong", {}, "Admin"), h("span", {}, "Unlocked for 15 minutes")), rows];
+          [0, 1, 2].map(() => h("div", { class: "row" })));
+        nodes = [statusBar(), h("div", { class: "admin-head" }, h("strong", {}, "Admin"), h("span", {}, "Unlocked for 15 minutes")), rows, softbar("Select", "Close")];
         break;
       }
     }
     screen.replaceChildren(...nodes);
+    if (state.mode === "lock") note.textContent = "This is the phone's own lock screen. The left dash key unlocks it.";
+    else if (state.mode === "off") note.textContent = "Screen off. Press any key to wake the phone.";
+    else if (Date.now() > touchNoteUntil) note.textContent = "";
   }
 
   function home() { state.mode = "home"; state.dial = ""; render(); }
@@ -447,6 +467,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
 
   function press(k) {
     const m = state.mode;
+    const act = k === "ok" || k === "green" || k === "menu";
     if (m === "off") { state.mode = "lock"; return render(); }
     if (m === "lock") {
       if (k === "menu") { state.sel = 0; return home(); }
@@ -454,13 +475,15 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
       return;
     }
     if (k === "red") {
-      if (m === "home") { state.mode = "off"; return render(); }
-      state.sel = 0; return home();
+      // Red is the power key: it hangs up a call; otherwise the screen goes off, and waking it comes back home.
+      if (m === "call") { state.sel = 0; return home(); }
+      state.mode = "off"; state.dial = ""; state.sel = 0;
+      return render();
     }
     if (m === "home") {
       if (k === "up") state.sel = (state.sel - 1 + items.length) % items.length;
       else if (k === "down") state.sel = (state.sel + 1) % items.length;
-      else if (k === "ok" || k === "green") return activate(items[state.sel]);
+      else if (act) return activate(items[state.sel]);
       else if (DIGITS.includes(k)) { state.mode = "dial"; state.dial = k; }
       return render();
     }
@@ -473,14 +496,14 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
         if (!state.dial) return home();
       } else if (k === "back-long") { return home(); }
       else if (k === "0-long") { if (state.dial.endsWith("0")) state.dial = state.dial.slice(0, -1) + "+"; }
-      else if (k === "ok" || k === "green") { state.target = state.dial; state.dial = ""; state.mode = "call"; }
+      else if (act) { state.target = state.dial; state.dial = ""; state.mode = "call"; }
       return render();
     }
     if (m === "admin") {
       if (k === "up") state.adminSel = (state.adminSel - 1 + ADMIN.length) % ADMIN.length;
       else if (k === "down") state.adminSel = (state.adminSel + 1) % ADMIN.length;
       else if (k === "back") return home();
-      else if (k === "ok" || k === "green") {
+      else if (act) {
         const choice = ADMIN[state.adminSel];
         if (choice === "Lock now") return home();
         state.app = choice; state.mode = "app";
@@ -499,8 +522,7 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
       longFired = false;
       if (LONG[k]) timer = setTimeout(() => {
         longFired = true;
-        if (k === "0" && state.mode === "home") press("0");
-        else if (k === "0") press("0");
+        if (k === "0") press("0");
         press(LONG[k]);
       }, 600);
     });
@@ -513,8 +535,10 @@ kbd { font: 500 12px/1 var(--mono); padding: 2px 5px; border: 1px solid var(--li
   // Touch is off on the real home screen.
   let noteTimer;
   screen.addEventListener("click", () => {
+    if (state.mode === "off" || state.mode === "lock") return;
     note.textContent = "Touch is switched off. Use the keys.";
-    clearTimeout(noteTimer); noteTimer = setTimeout(() => { note.textContent = ""; }, 2200);
+    touchNoteUntil = Date.now() + 2200;
+    clearTimeout(noteTimer); noteTimer = setTimeout(() => { if (Date.now() >= touchNoteUntil) note.textContent = ""; }, 2200);
   });
 
   // Computer keyboard.

@@ -12,6 +12,7 @@ import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.provider.Telephony
@@ -83,9 +84,18 @@ class HomeActivity : Activity() {
     private lateinit var dialLabel: TextView
     private lateinit var dialNumber: TextView
     private lateinit var dialHint: TextView
+    private lateinit var softRule: View
+    private lateinit var softLeft: TextView
+    private lateinit var softRight: TextView
     private val rows = mutableListOf<Row>()
     private var groupRule: View? = null
     private var rowTextPx = 0f
+
+    /**
+     * The left dash key also unlocks the lock screen, so a double press would unlock and then call
+     * whoever is highlighted. Ignore the action keys for a moment after the screen comes back.
+     */
+    private var quietUntil = 0L
 
     // ---------------------------------------------------------------- lifecycle
 
@@ -114,6 +124,7 @@ class HomeActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        quietUntil = SystemClock.uptimeMillis() + QUIET_MS
         Ui.hideSystemBars(window)
         refreshCounts()
     }
@@ -139,7 +150,10 @@ class HomeActivity : Activity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) Ui.hideSystemBars(window)
+        if (hasFocus) {
+            quietUntil = maxOf(quietUntil, SystemClock.uptimeMillis() + QUIET_MS)
+            Ui.hideSystemBars(window)
+        }
     }
 
     override fun onDestroy() {
@@ -238,25 +252,27 @@ class HomeActivity : Activity() {
         when (keyCode) {
             KeyEvent.KEYCODE_DPAD_UP -> { if (dial.isEmpty()) move(-1); return true }
             KeyEvent.KEYCODE_DPAD_DOWN -> { if (dial.isEmpty()) move(+1); return true }
-            in OK_KEYS -> {
-                if (event.repeatCount == 0) { if (dial.isNotEmpty()) callTyped() else activate(selected) }
+            in OK_KEYS, in LEFT_SOFT_KEYS -> {
+                if (event.repeatCount == 0 && SystemClock.uptimeMillis() >= quietUntil) {
+                    if (dial.isNotEmpty()) callTyped() else activate(selected)
+                }
                 return true
             }
-            KeyEvent.KEYCODE_BACK -> {
+            in RIGHT_SOFT_KEYS -> {
                 if (event.repeatCount == 0) {
                     event.startTracking()
                     if (dial.isNotEmpty()) { dial.setLength(dial.length - 1); render() }
                 }
                 return true
             }
-            KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_MENU -> return true
+            KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT -> return true
         }
         return super.onKeyDown(keyCode, event)
     }
 
     override fun onKeyLongPress(keyCode: Int, event: KeyEvent): Boolean {
         when (keyCode) {
-            KeyEvent.KEYCODE_BACK -> { dial.clear(); render(); return true }
+            in RIGHT_SOFT_KEYS -> { dial.clear(); render(); return true }
             KeyEvent.KEYCODE_0 -> {
                 if (dial.endsWith("0")) { dial.setCharAt(dial.length - 1, '+'); render() }
                 return true
@@ -267,8 +283,8 @@ class HomeActivity : Activity() {
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
         // Swallow the ups too, so the system's own fallbacks (e.g. green opening the dialler) never run.
-        if (digitFor(keyCode) != null || keyCode in OK_KEYS || keyCode == KeyEvent.KEYCODE_BACK ||
-            keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_DOWN ||
+        if (digitFor(keyCode) != null || keyCode in OK_KEYS || keyCode in LEFT_SOFT_KEYS || keyCode in RIGHT_SOFT_KEYS ||
+            keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_DOWN ||
             keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
         ) return true
         return super.onKeyUp(keyCode, event)
@@ -444,6 +460,20 @@ class HomeActivity : Activity() {
         dialPanel.addView(dialNumber, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(17f)).apply { topMargin = px(2f) })
         dialPanel.addView(dialHint, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { topMargin = px(2f) })
         root.addView(dialPanel, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+
+        // Soft-key labels along the bottom edge, above the two dash keys either side of the D-pad.
+        softRule = View(this)
+        root.addView(softRule, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(0.5f).coerceAtLeast(2)))
+        val softBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(px(3.4f), 0, px(3.4f), 0)
+        }
+        softLeft = Ui.text(this, 5.8f * u, Ui.BOLD).apply { gravity = Gravity.START }
+        softRight = Ui.text(this, 5.8f * u, Ui.BOLD).apply { gravity = Gravity.END }
+        softBar.addView(softLeft, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        softBar.addView(softRight, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        root.addView(softBar, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(9f)))
     }
 
     private fun rebuildRows() {
@@ -481,7 +511,7 @@ class HomeActivity : Activity() {
     private fun sizeRows() {
         val h = rows.firstOrNull()?.view?.height ?: return
         if (h <= 0) return
-        val textPx = min(8f * u, h * 0.58f)
+        val textPx = min(8f * u, h * 0.62f)
         if (textPx == rowTextPx) return
         rowTextPx = textPx
         for (r in rows) {
@@ -503,6 +533,16 @@ class HomeActivity : Activity() {
         groupRule?.setBackgroundColor((p.ink and 0x00FFFFFF) or 0x59000000)
 
         val dialling = dial.isNotEmpty()
+        softRule.setBackgroundColor(p.ink)
+        softLeft.setTextColor(p.ink)
+        softRight.setTextColor(p.ink)
+        softLeft.text = when {
+            dialling -> "Call"
+            items.getOrNull(selected) is Person -> "Call"
+            else -> "Open"
+        }
+        softRight.text = if (dialling) "Delete" else ""
+
         list.visibility = if (dialling) View.GONE else View.VISIBLE
         dialPanel.visibility = if (dialling) View.VISIBLE else View.GONE
         if (dialling) {
@@ -547,7 +587,7 @@ class HomeActivity : Activity() {
             setSpan(ForegroundColorSpan(p.muted), start, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
         strong("Green"); plain(" to call\n")
-        strong("Back"); plain(" to delete")
+        plain("Hold "); strong("Delete"); plain(" to clear")
     }
 
     private fun px(units: Float): Int = (units * u).toInt()
@@ -555,9 +595,14 @@ class HomeActivity : Activity() {
     companion object {
         private const val TAG = "Doovdroid"
         private const val MAX_DIAL = 24
+        private const val QUIET_MS = 800L
         private val OK_KEYS = setOf(
             KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_NUMPAD_ENTER, KeyEvent.KEYCODE_CALL,
         )
+
+        /** The dash keys either side of the D-pad (see docs/device.md for what the phone sends). */
+        private val LEFT_SOFT_KEYS = setOf(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_SOFT_LEFT)
+        private val RIGHT_SOFT_KEYS = setOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_SOFT_RIGHT)
         private val FALLBACK_EMERGENCY = setOf("999", "112", "911")
     }
 }

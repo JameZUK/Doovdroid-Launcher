@@ -41,7 +41,7 @@ class AdminActivity : Activity() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(palette.paper)
-            setPadding(0, px(3f), 0, px(3f))
+            setPadding(0, px(3f), 0, 0)
         }
         val title = Ui.text(this, 7f * u, Ui.BOLD).apply { text = "Admin"; setTextColor(palette.ink); setPadding(px(3.4f), 0, px(3.4f), 0) }
         subtitle = Ui.text(this, 4.6f * u).apply { setTextColor(palette.muted); setPadding(px(3.4f), px(1f), px(3.4f), px(2f)) }
@@ -69,6 +69,21 @@ class AdminActivity : Activity() {
         }
         root.addView(info)
 
+        // Soft-key labels above the two dash keys, as on the home screen.
+        root.addView(android.view.View(this), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+        root.addView(android.view.View(this).apply { setBackgroundColor(palette.ink) },
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(0.5f).coerceAtLeast(2)))
+        val softBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(px(3.4f), 0, px(3.4f), 0)
+        }
+        for ((label, g) in listOf("Select" to Gravity.START, "Close" to Gravity.END)) {
+            softBar.addView(Ui.text(this, 5.8f * u, Ui.BOLD).apply { text = label; gravity = g; setTextColor(palette.ink) },
+                LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        }
+        root.addView(softBar, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, px(9f)))
+
         setContentView(root)
         Ui.hideSystemBars(window)
         render()
@@ -92,7 +107,8 @@ class AdminActivity : Activity() {
         when (keyCode) {
             KeyEvent.KEYCODE_DPAD_UP -> { selected = (selected - 1 + entries.size) % entries.size; render(); return true }
             KeyEvent.KEYCODE_DPAD_DOWN -> { selected = (selected + 1) % entries.size; render(); return true }
-            KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_NUMPAD_ENTER, KeyEvent.KEYCODE_CALL -> {
+            KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_NUMPAD_ENTER, KeyEvent.KEYCODE_CALL,
+            KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_SOFT_LEFT -> {
                 if (event.repeatCount == 0) entries[selected].action()
                 return true
             }

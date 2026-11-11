@@ -1,7 +1,11 @@
 package uk.me.jamez.doovdroid
 
 import android.accessibilityservice.AccessibilityService
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 
@@ -9,10 +13,33 @@ import android.view.accessibility.AccessibilityEvent
  * Keeps the phone on the simple home screen (an accessibility service, enabled by
  * scripts/setup-phone.sh). Unless the admin code has been entered:
  *  - the notification pull-down is closed as soon as it opens (it leads to Settings);
- *  - Settings, the app stores, the old launcher and the other hidden apps go straight back home.
+ *  - Settings, the app stores, the old launcher and the other hidden apps go straight back home;
+ *  - when the screen goes off (the red key is the power key on this phone), the home screen is
+ *    brought back, so waking the phone always starts from home. Not during a call or while ringing.
  * Calls, Messages, WhatsApp, Contacts, the keyboard and the system's own dialogs are left alone.
  */
 class GuardService : AccessibilityService() {
+
+    private val screenOff = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (Admin.isUnlocked(context)) return
+            // MODE_IN_CALL (phone), MODE_IN_COMMUNICATION (WhatsApp call), MODE_RINGTONE: leave alone.
+            val mode = getSystemService(AudioManager::class.java)?.mode ?: AudioManager.MODE_NORMAL
+            if (mode != AudioManager.MODE_NORMAL) return
+            Log.i(TAG, "screen off; back to the home screen")
+            startHome()
+        }
+    }
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        registerReceiver(screenOff, IntentFilter(Intent.ACTION_SCREEN_OFF), RECEIVER_NOT_EXPORTED)
+    }
+
+    override fun onDestroy() {
+        runCatching { unregisterReceiver(screenOff) }
+        super.onDestroy()
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null || event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
@@ -39,6 +66,10 @@ class GuardService : AccessibilityService() {
 
     private fun goHome() {
         performGlobalAction(GLOBAL_ACTION_HOME)
+        startHome()
+    }
+
+    private fun startHome() {
         runCatching {
             startActivity(Intent(this, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP))
         }.onFailure { Log.w(TAG, "Can't start home", it) }

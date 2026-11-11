@@ -33,17 +33,22 @@ ssh -F ~/.ssh/config bench-laptop 'adb devices -l'
 │   WhatsApp            23 │
 │   Recent calls   2 missed│
 │   Contacts               │
+│──────────────────────────│
+│ Call                     │  ← what the left dash key does
 └──────────────────────────┘
 ```
 
 - **One screen.** No pages, no scrolling; touch is ignored on the home screen.
-- **▲ ▼** move the highlight. **OK** or the **green key** calls the highlighted person, or
-  opens the highlighted item.
-- **Typing digits** starts dialling a number, shown large; **green** or **OK** calls it,
-  **Back** deletes a digit (hold to clear).
-- **Red key** goes back to this screen from anywhere (and ends calls, as always).
+- **▲ ▼** move the highlight. **OK** or **green** calls the highlighted person, or opens the
+  highlighted item.
+- **The two dash keys** (blank soft keys either side of the D-pad) do what the bar at the bottom
+  of the screen says: left is **Call** / **Open**, right is **Delete** while dialling.
+- **Typing digits** starts dialling a number, shown large; green, OK or the left dash key calls it;
+  the right dash key deletes a digit (hold to clear).
+- **Red is the power key** on this phone. It hangs up a call; otherwise it turns the screen off,
+  and waking the phone always comes back to this screen.
 - Unread counts for Messages and WhatsApp, and missed calls, appear on their rows.
-- Lock screen: unchanged, **Menu** unlocks it (a keypad lock against pocket-dialling).
+- Lock screen: the phone's own, unchanged; the **left dash key** unlocks it.
 
 ## Admin access
 
