@@ -1,0 +1,18 @@
+# Gradle / Android Studio
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+captures/
+
+# Signing material never goes in the repo
+*.jks
+*.keystore
+signing.properties
+
+# Anything pulled off the phone (screenshots, configs, dumps) contains personal data
+pulled/
+*.png
+!app/src/main/res/**/*.png
