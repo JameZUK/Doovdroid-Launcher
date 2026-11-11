@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Doovdroid</string>
+    <string name="guard_label">Doovdroid guard</string>
+    <string name="guard_description">Keeps the phone on the simple home screen: closes the notification pull-down and returns to the home screen from Settings and other hidden apps, unless the admin code has been entered.</string>
+    <string name="badge_label">Doovdroid badges</string>
 </resources>
