@@ -69,8 +69,16 @@ exactly one device) while someone presses each key a different number of times.
 - **Third-party:** WhatsApp 2.26.37.73 (from Play Store; signed in, in active use), Facebook.
 - **Google:** Play Store, Chrome, YouTube, Gmail, Files; **no Google account** on the phone.
 - **Disabled when found:** `com.mediatek.camera`, `com.google.android.gms.supervision`, `com.android.nfc`.
-- **Vendor oddities, not yet looked at:** `com.example.google`, `com.zkwl.zkwlesc`,
-  `com.meng.tools`, `com.bsktek.update` (FOTA?), `com.custom.voice`, `com.iflytek.speechsuite`. **TODO**.
+- **Vendor apps** (labels from `aapt dump badging` on the pulled APKs):
+  `com.example.google` "Gboard" (`/system/app/HysGboard`, has an app icon; *not* the real Gboard,
+  which is `com.google.android.inputmethod.latin`), `com.meng.tools` "Clean Memory",
+  `com.zkwl.zkwlesc` "ZkwlESC" (unknown), `com.bsktek.update` "FOTA Update" (system updates, leave
+  alone), `com.custom.voice` "VoiceBroadcast", `com.iflytek.speechsuite`. What ZkwlESC and the
+  fake Gboard actually do: **TODO**.
+- **"Caring mode"** on the old launcher is `com.android.settings/.Settings$CareboardActivity`.
+- **Accessibility services already on:** `com.android.settings/…ButtonLightService` (keypad backlight,
+  presumably; the stored value is literally `null:com.android.settings/…`). Keep it.
+- **Notification listeners already on:** `com.dp.op/…DeskNoticeService`, `com.android.launcher3/…NotificationListener`.
 - **Contacts:** 258; SIM, phone and WhatsApp copies of the same people, so each speed-dial name
   matches 2–3 raw contacts that share one normalised number. None are starred.
 - **Lock screen:** swipe (no PIN); the **Menu** key dismisses it. `locksettings verify` succeeds with

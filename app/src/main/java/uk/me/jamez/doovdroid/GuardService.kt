@@ -104,6 +104,8 @@ class GuardService : AccessibilityService() {
             "com.mediatek.factorymode",
             "com.android.agingtest",
             "com.mediatek.camera",
+            "com.example.google", // vendor app labelled "Gboard"; not the real keyboard
+            "com.meng.tools", // "Clean Memory"
         )
     }
 }
